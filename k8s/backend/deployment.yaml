@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentinelops-backend
+  labels:
+    app: sentinelops-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sentinelops-backend
+  template:
+    metadata:
+      labels:
+        app: sentinelops-backend
+    spec:
+      containers:
+        - name: backend
+          image: 624606539716.dkr.ecr.ap-south-1.amazonaws.com/sentinelops-backend:v1
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8000
+
+          env:
+            - name: ENVIRONMENT
+              value: "dev"
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
